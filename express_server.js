@@ -5,6 +5,10 @@ app.set("view engine", "ejs"); // Setting ejs as the view engine
 const bodyParser = require("body-parser"); // imported installed package (middleware) body-parser
 app.use(bodyParser.urlencoded({extended: true})); // setting app to use bodyParser created.
 
+function generateRandomString() {
+  return Math.random().toString(36).substring(2,8);
+}
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -13,6 +17,7 @@ const urlDatabase = {
 app.get("/", (req, res) => {
   res.send("Welcome to my home page!");
 });
+
 
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
