@@ -2,6 +2,8 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 app.set("view engine", "ejs"); // Setting ejs as the view engine
+const bodyParser = require("body-parser"); // imported installed package (middleware) body-parser
+app.use(bodyParser.urlencoded({extended: true})); // setting app to use bodyParser created.
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
