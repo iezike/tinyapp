@@ -56,14 +56,27 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-//  delete a single url on the storage list (urlDatabase), and redirect to the same page (.../urls) with the list
+//  Creating a post request for clicking on the delete button.
 app.post("/urls/:shortURL/delete", (req, res) => {
+  const shortURL = req.params.shortURL; // This retrieves the corresponding shortURL
+  delete urlDatabase[shortURL]; // delete its shortURL-longURL pair from the list
+  res.redirect("/urls");   // redirecting to urls list page
+});
+
+// Creating a post request for clicking on Edit button
+app.post("/urls/:shortURL/Edit", (req, res) => {
   const shortURL = req.params.shortURL; // This retrieves the shortURL
-  delete urlDatabase[shortURL]; // delete the shortURL-longURL pair from the list
-  res.redirect("/urls");   // redirecting
+  res.redirect(`/urls/${shortURL}`);   // redirecting to the corresponding single url form page.
 });
 
 
+app.post("/urls/:shortURL", (req, res) => {
+  let shortURL = req.params.shortURL; // This retrieves the shortURL
+  delete urlDatabase[shortURL]; // delete the old shortURL-longURL pair from the list
+  shortURL = generateRandomString();  // generate a new shortURL
+  urlDatabase[shortURL] = req.body.longURL; // pair the new shortURL with provided (Edited) longURL.
+  res.redirect(`/urls`);       // Respond with a redirect to  urls list page
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
