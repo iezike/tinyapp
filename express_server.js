@@ -6,17 +6,21 @@ const bodyParser = require("body-parser"); // imported installed package (middle
 app.use(bodyParser.urlencoded({extended: true})); // setting app to use bodyParser created.
 
 const generateRandomString = function() {
-  return Math.random().toString(36).substring(2,8);
+  return Math.random().toString(36).substring(2,8); // generates a random alphanumeric string of length six.
 };
 
+// Create an object to store long URL(main site), with shortURL keys
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
+
+// This is an example
 app.get("/", (req, res) => {
-  res.send("Welcome to my home page!");
+  res.render("homepage");
 });
+
 
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
@@ -25,12 +29,12 @@ app.post("/urls", (req, res) => {
 });
 
 
-
-
+// This is an example
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+//renders to urls_index
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
@@ -43,7 +47,7 @@ app.get("/urls/new", (req, res) => {
 // Shows a single shortURL with corresponding longURL
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
-  res.render("urls_show", templateVars);
+  res.render("urls_show", templateVars); // renders templateVars variable to urls_show file
 });
 
 //  create a redirect to the longURL, main website.
@@ -51,6 +55,14 @@ app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
+
+//  delete a single url on the storage list (urlDatabase), and redirect to the same page (.../urls) with the list
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const shortURL = req.params.shortURL; // This retrieves the shortURL
+  delete urlDatabase[shortURL]; // delete the shortURL-longURL pair from the list
+  res.redirect("/urls");   // redirecting
+});
+
 
 
 app.listen(PORT, () => {
