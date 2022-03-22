@@ -22,13 +22,6 @@ app.get("/", (req, res) => {
 });
 
 
-app.post("/urls", (req, res) => {
-  const shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL; // set the post request body to a random string six string.
-  res.redirect(`/u/${shortURL}`);       // Respond with a  redirect URL using the generated shortURL-longURL pair
-});
-
-
 // This is an example
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
@@ -46,7 +39,10 @@ app.get("/urls/new", (req, res) => {
 
 // Shows a single shortURL with corresponding longURL
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const templateVars = {
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL]
+  };
   res.render("urls_show", templateVars); // renders templateVars variable to urls_show file
 });
 
@@ -56,27 +52,35 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-//  Creating a post request for clicking on the delete button.
+// Create url.
+app.post("/urls", (req, res) => {
+  const shortURL = generateRandomString();
+  urlDatabase[shortURL] = req.body.longURL; // set the post request body to a random string six string.
+  res.redirect(`/urls/${shortURL}`);       // Respond with a  redirect URL using the generated shortURL-longURL pair
+});
+
+// Edit url
+app.post("/urls/:shortURL", (req, res) => {
+  let shortURL = req.params.shortURL; // This retrieves the shortURL
+  urlDatabase[shortURL] = req.body.longURL; // pair the new shortURL with provided (Edited) longURL.
+  res.redirect(`/urls/${shortURL}`);      // Respond with a redirect to  urls list page
+});
+
+// Delete url
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL; // This retrieves the corresponding shortURL
   delete urlDatabase[shortURL]; // delete its shortURL-longURL pair from the list
   res.redirect("/urls");   // redirecting to urls list page
 });
 
-// Creating a post request for clicking on Edit button
-app.post("/urls/:shortURL/Edit", (req, res) => {
-  const shortURL = req.params.shortURL; // This retrieves the shortURL
-  res.redirect(`/urls/${shortURL}`);   // redirecting to the corresponding single url form page.
-});
+// // Creating a post request for clicking on Edit button
+// app.post("/urls/:shortURL/Edit", (req, res) => {
+//   const shortURL = req.params.shortURL; // This retrieves the shortURL
+//   res.redirect(`/urls/${shortURL}`);   // redirecting to the corresponding single url form page.
+// });
 
 
-app.post("/urls/:shortURL", (req, res) => {
-  let shortURL = req.params.shortURL; // This retrieves the shortURL
-  delete urlDatabase[shortURL]; // delete the old shortURL-longURL pair from the list
-  shortURL = generateRandomString();  // generate a new shortURL
-  urlDatabase[shortURL] = req.body.longURL; // pair the new shortURL with provided (Edited) longURL.
-  res.redirect(`/urls`);       // Respond with a redirect to  urls list page
-});
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
