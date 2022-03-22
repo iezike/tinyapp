@@ -18,11 +18,14 @@ app.get("/", (req, res) => {
   res.send("Welcome to my home page!");
 });
 
-
+let shortURL = "";
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  shortURL = generateRandomString();
+  urlDatabase[shortURL] = req.body.longURL; // set the post request body to a random string six string.
+  res.redirect(`/urls/${shortURL}`)         // Respond with a  redirect URL using the generated shortURL-longURL pair
 });
+
+
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
@@ -37,10 +40,12 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+// Shows a single shortURL with corresponding longURL
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]}; 
   res.render("urls_show", templateVars);
 });
+
 
 
 
