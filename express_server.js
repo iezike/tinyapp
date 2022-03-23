@@ -1,6 +1,8 @@
 const express = require("express"); // import express, a framework to simpler server
 const app = express(); // activate the express for use.
 const PORT = 8080; // default port value 8080
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
 app.set("view engine", "ejs"); // Setting ejs as the view engine
 const bodyParser = require("body-parser"); // imported installed package (middleware) body-parser
 app.use(bodyParser.urlencoded({extended: true})); // setting app to use bodyParser created.
@@ -29,12 +31,13 @@ app.get("/urls.json", (req, res) => {
 
 //renders to urls_index
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { urls: urlDatabase, username: req.cookies["username"]};
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = { username: req.cookies["username"] };
+  res.render("urls_new", templateVars);
 });
 
 
@@ -43,7 +46,8 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL]
+    longURL: urlDatabase[req.params.shortURL],
+    username: req.cookies["username"]
   };
   res.render("urls_show", templateVars); // renders templateVars variable to urls_show file
 });
@@ -75,18 +79,20 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls");   // redirecting to urls list page
 });
 
-// Create url.
-app.post("/urls/:login/username", (req, res) => {
-  const username = req.body.username;
-  res.cookie('name', username)
-  res.redirect("/urls");       // Respond with a  redirect URL using the generated shortURL-longURL pair
 
+app.post("/login", (req, res) => {
+  let username = req.body.username;
+  res.cookie("username", username) 
+  res.redirect("/urls");       // Respond with a  redirect URL using the generated shortURL-longURL pair 
 });
-// // Creating a post request for clicking on Edit button
-// app.post("/urls/:shortURL/Edit", (req, res) => {
-//   const shortURL = req.params.shortURL; // This retrieves the shortURL
-//   res.redirect(`/urls/${shortURL}`);   // redirecting to the corresponding single url form page.
-// });
+
+app.post("/logout", (req, res) => {
+  res.clearCookie("username")
+  console.log("We are here")
+  res.redirect("/urls");       // Respond with a  redirect URL using the generated shortURL-longURL pair 
+});
+
+
 
 
 app.listen(PORT, () => {
