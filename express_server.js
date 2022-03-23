@@ -88,7 +88,6 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   res.clearCookie("username")
-  console.log("We are here")
   res.redirect("/urls");       // Respond with a  redirect URL using the generated shortURL-longURL pair 
 });
 
