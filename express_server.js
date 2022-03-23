@@ -1,6 +1,6 @@
-const express = require("express");
-const app = express();
-const PORT = 8080; // default port 8080
+const express = require("express"); // import express, a framework to simpler server
+const app = express(); // activate the express for use.
+const PORT = 8080; // default port value 8080
 app.set("view engine", "ejs"); // Setting ejs as the view engine
 const bodyParser = require("body-parser"); // imported installed package (middleware) body-parser
 app.use(bodyParser.urlencoded({extended: true})); // setting app to use bodyParser created.
@@ -36,6 +36,8 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
+
+
 
 // Shows a single shortURL with corresponding longURL
 app.get("/urls/:shortURL", (req, res) => {
@@ -73,6 +75,13 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls");   // redirecting to urls list page
 });
 
+// Create url.
+app.post("/urls/:login/username", (req, res) => {
+  const username = req.body.username;
+  res.cookie('name', username)
+  res.redirect("/urls");       // Respond with a  redirect URL using the generated shortURL-longURL pair
+
+});
 // // Creating a post request for clicking on Edit button
 // app.post("/urls/:shortURL/Edit", (req, res) => {
 //   const shortURL = req.params.shortURL; // This retrieves the shortURL
