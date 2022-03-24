@@ -17,17 +17,31 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+// Create storage for Registered users
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+};
 
-// This is an example
+// Playaround with this
 app.get("/", (req, res) => {
-  res.render("homepage");
+  const templateVars = { username: req.cookies["username"] };
+  res.render("homepage", templateVars);
 });
 
 
-// This is an example
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
+// // This is an example
+// app.get("/urls.json", (req, res) => {
+//   res.json(urlDatabase);
+// });
 
 //renders to urls_index
 app.get("/urls", (req, res) => {
@@ -87,15 +101,23 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.post("/login", (req, res) => {
   let username = req.body.username;
-  res.cookie("username", username) 
-  res.redirect("/urls");       // Respond with a  redirect URL using the generated shortURL-longURL pair 
+  res.cookie("username", username);
+  res.redirect("/urls");       // Respond with a  redirect URL using the generated shortURL-longURL pair
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username")
-  res.redirect("/urls");       // Respond with a  redirect URL using the generated shortURL-longURL pair 
+  res.clearCookie("username");
+  res.redirect("/urls");       // Respond with a  redirect URL using the generated shortURL-longURL pair
 });
 
+// Create a post request to handle registeration form
+app.post("/register", (req, res) => {
+  const newID = generateRandomString();
+  const newUser = { id: newID, email: req.body.email, password: req.body.password  };
+  users[ `user${newID}`] = newUser;
+  res.cookie("user_id", newID);
+  res.redirect("/urls");
+});
 
 
 
