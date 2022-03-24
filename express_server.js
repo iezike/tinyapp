@@ -29,7 +29,7 @@ const users = {
 const checkRegUser = function(emailAddress) {
   for (let user in users) {
     if (users[user]["email"] === emailAddress) {
-      return true;
+      return users[user].id;
     }
   }
   return false;
@@ -68,6 +68,10 @@ app.get("/register", (req, res) => {
   res.render("reg_form", templateVars);
 });
 
+app.get("/login", (req, res) => {
+  const templateVars = { user: users[req.cookies["user_id"]]};
+  res.render("login_form", templateVars);
+});
 
 
 // Shows a single shortURL with corresponding longURL
@@ -93,6 +97,16 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);       // Respond with a  redirect URL using the generated shortURL-longURL pair
 });
 
+
+// Creating!!!!!!!!!!!!!!!!!!!!!
+// Create seperate login .
+app.post("/urls", (req, res) => {
+  const shortURL = generateRandomString();
+  urlDatabase[shortURL] = req.body.longURL; // set the post request body to a random string six string.
+  res.redirect(`/urls/${shortURL}`);       // Respond with a  redirect URL using the generated shortURL-longURL pair
+});
+
+
 // Edit url
 app.post("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL; // This retrieves the shortURL
@@ -109,8 +123,13 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 
 app.post("/login", (req, res) => {
-  let username = req.body.username;
-  res.cookie("user_id", username);
+  let email= req.body.email;
+  const id = checkRegUser(email)
+  const password = req.body.password
+  if(users[id]["email"] !== email || users[id]["password"] !== password) {
+    return res.send("Invalid User")
+  }
+  res.cookie("user_id", id);
   res.redirect("/urls");       // Respond with a  redirect URL using the generated shortURL-longURL pair
 });
 
