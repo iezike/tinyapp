@@ -40,6 +40,11 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
+app.get("/register", (req, res) => {
+  const templateVars = { username: req.cookies["username"] };
+  res.render("reg_form", templateVars);
+});
+
 
 
 // Shows a single shortURL with corresponding longURL
