@@ -23,7 +23,8 @@ const users = {
     id: "userRandomID",
     email: "user@example.com",
     password: "purple-monkey-dinosaur"
-  }
+  },  '81p1w0': { id: '81p1w0', email: 'ezike_iyke@yahoo.com', password: '123' },
+  wtjrw5: { id: 'wtjrw5', email: 'benjamin.node@gmail.com', password: 'come' }
 };
 
 const checkRegUser = function(emailAddress) {
@@ -35,27 +36,35 @@ const checkRegUser = function(emailAddress) {
   return false;
 };
 
-// console.log(users)
-// console.log(checkRegUser("ezike_iyke@yahoo.com"))
-// console.log(checkRegUser("benjamin.node@gmail.com"))
-// console.log(checkRegUser("user@example.com"))
+const emailPasswordMatch = function(emailAddress, password) {
+  if (!checkRegUser(emailAddress)) {
+    return false;
+  }
+  if(users[checkRegUser(emailAddress)]["password"] == password) {
+    return true
+  }
+  return false;
+}
 
-// Playaround with this
-app.get("/", (req, res) => {
-  const templateVars = { username: req.cookies["username"] };
-  res.render("homepage", templateVars);
-});
 
-
-// // This is an example
-// app.get("/urls.json", (req, res) => {
-//   res.json(urlDatabase);
+// // Playaround with this
+// app.get("/", (req, res) => {
+//   console.log(req.cookies)
+//   const templateVars = { username: req.cookies };
+//   console.log(templateVars)
+//   res.render("homepage", templateVars);
 // });
+
 
 //renders to urls_index
 app.get("/urls", (req, res) => {
+  console.log("database: ", urlDatabase)
+  console.log("cookies ", users[req.cookies["user_id"]])
+  console.log("Users ", users)
+  console.log("---------------------")
+ 
   const templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
-  res.render("urls_index", templateVars);
+  res.render("urls_index",  templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
@@ -74,7 +83,7 @@ app.get("/login", (req, res) => {
 });
 
 
-// Shows a single shortURL with corresponding longURL
+// Shows a single shortURL with corresponding longURL 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL,
@@ -84,7 +93,7 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars); // renders templateVars variable to urls_show file
 });
 
-//  create a redirect to the longURL, main website.
+// Get request for redirect to the longURL, main website.
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
@@ -97,19 +106,9 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);       // Respond with a  redirect URL using the generated shortURL-longURL pair
 });
 
-
-// Creating!!!!!!!!!!!!!!!!!!!!!
-// Create seperate login .
-app.post("/urls", (req, res) => {
-  const shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL; // set the post request body to a random string six string.
-  res.redirect(`/urls/${shortURL}`);       // Respond with a  redirect URL using the generated shortURL-longURL pair
-});
-
-
 // Edit url
 app.post("/urls/:shortURL", (req, res) => {
-  let shortURL = req.params.shortURL; // This retrieves the shortURL
+  const shortURL = req.params.shortURL; // This retrieves the shortURL
   urlDatabase[shortURL] = req.body.longURL; // pair the new shortURL with provided (Edited) longURL.
   res.redirect(`/urls/${shortURL}`);      // Respond with a redirect to  urls list page
 });
@@ -122,31 +121,36 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 
+// Create a login route
 app.post("/login", (req, res) => {
-  let email= req.body.email;
-  const id = checkRegUser(email)
-  const password = req.body.password
-  if(users[id]["email"] !== email || users[id]["password"] !== password) {
-    return res.send("Invalid User")
+  const currentEmail = req.body.email;
+  const currentPassword = req.body.password;
+  if (req.body.email === "" || req.body.password === "") {
+    return res.send("Invalid User");
   }
-  res.cookie("user_id", id);
+  if(!checkRegUser(currentEmail)) {
+    return res.send("Invalid User");
+  }
+  if (!emailPasswordMatch(currentEmail, currentPassword )){
+    return res.send("email does not matche password");
+  }
+  res.cookie("user_id", checkRegUser(currentEmail));
   res.redirect("/urls");       // Respond with a  redirect URL using the generated shortURL-longURL pair
 });
 
-
 app.post("/logout", (req, res) => {
-  console.log(users);
   res.clearCookie("user_id");
   res.redirect("/urls");       // Respond with a  redirect URL using the generated shortURL-longURL pair
 });
 
+
 // Create a post request to handle registeration form
 app.post("/register", (req, res) => {
   if (req.body.email === "" || req.body.password === "") {
-    res.send("Invalid");
+    return res.send("Invalid User");
   }
   if (checkRegUser(req.body.email)) {
-    res.send("Email already exit ");
+    return res.send("Email already exit ");
   }
   const newID = generateRandomString();
   const newUser = { id: newID, email: req.body.email, password: req.body.password };
