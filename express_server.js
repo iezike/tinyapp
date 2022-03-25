@@ -85,7 +85,13 @@ const checkUserURLs = function(userId) {
 
 //renders to urls_index
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
+  const urlFilter = {};
+  for ( let url in urlDatabase) {
+    if (urlDatabase[url]["userID"] === req.cookies["user_id"]) {
+      urlFilter[url] = urlDatabase[url];
+    }
+  }
+  const templateVars = { urls: urlFilter, user: users[req.cookies["user_id"]] };
   res.render("urls_index",  templateVars);
 });
 
