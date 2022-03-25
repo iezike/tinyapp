@@ -19,11 +19,11 @@ const generateRandomString = function() {
 const urlDatabase = {
   b6UTxQ: {
         longURL: "https://www.tsn.ca",
-        userID: "b6UTxQ"
+        userID: "aJ48lW"
     },
     i3BoGr: {
         longURL: "https://www.google.ca",
-        userID: "i3BoGr"
+        userID: "jJ48lW"
     }
 };
 
@@ -55,6 +55,23 @@ const emailPasswordMatch = function(emailAddress, password) {
   }
   return false;
 }
+const urlUserIDMatch = function(url, user_id) {
+  for(let key in urlDatabase) {
+    if (urlDatabase[key]["userID"] === user_id && urlDatabase[key]["longURL"] === url) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const checkUserURLs = function(userId) {
+  for (let key in urlDatabase) {
+    if (urlDatabase[key]["userID"] === userId) {
+      return userId
+    }
+  }
+  return false
+}
 
 
 // // Playaround with this
@@ -68,11 +85,6 @@ const emailPasswordMatch = function(emailAddress, password) {
 
 //renders to urls_index
 app.get("/urls", (req, res) => {
-  console.log("database: ", urlDatabase)
-  console.log("cookies ", users[req.cookies["user_id"]])
-  console.log("Users ", users)
-  console.log("---------------------")
- 
   const templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
   res.render("urls_index",  templateVars);
 });
@@ -113,12 +125,12 @@ app.get("/u/:shortURL", (req, res) => {
 
 // Create url.
 app.post("/urls", (req, res) => {
+  let userNewPage = {};
   if (!req.cookies["user_id"]){
-    res.redirect("/login")
-  }
-  console.log(req.body.longURL)
-  const shortURL = generateRandomString();
-  const userNewPage = {longURL: req.body.longURL, userID: shortURL}
+    return res.redirect("/login");
+  } 
+  const shortURL = generateRandomString()
+  userNewPage = { longURL: req.body.longURL, userID: req.cookies["user_id"] }
   urlDatabase[shortURL] = userNewPage;
   res.redirect(`/urls/${shortURL}`);       // Respond with a  redirect URL using the generated shortURL-longURL pair
 });
@@ -126,7 +138,10 @@ app.post("/urls", (req, res) => {
 // Createn a route to handle edit url
 app.post("/urls/:shortURL", (req, res) => {
   if (!req.cookies["user_id"]){
-    res.redirect("/login")
+    return res.redirect("/login")
+  }
+  if (!urlUserIDMatch(urlDatabase[shortURL]["longURL"], req.cookies["user_id"])) {
+    return res.send(" Not authorized to Edit url")
   }
   const shortURL = req.params.shortURL; // This retrieves the shortURL
   // urlDatabase[shortURL]= req.body.longURL; 
@@ -136,11 +151,13 @@ app.post("/urls/:shortURL", (req, res) => {
 
 // Creat a route to handle delete url
 app.post("/urls/:shortURL/delete", (req, res) => {
+  const shortURL = req.params.shortURL; 
   if (!req.cookies["user_id"]){
-    res.redirect("/login")
+    return res.redirect("/login");
   }
-  const shortURL = req.params.shortURL; // This retrieves the corresponding shortURL
-  // delete urlDatabase[shortURL] 
+  if (!urlUserIDMatch(urlDatabase[shortURL]["longURL"], req.cookies["user_id"])) {
+    return res.send(" Not authorized to delete url")
+  }
   delete urlDatabase[shortURL]; // delete its shortURL-longURL pair from the list
   res.redirect("/urls");   // redirecting to urls list page
 });
