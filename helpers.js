@@ -27,7 +27,6 @@ const getUserByEmail = function(emailAddress, users) {
       return users[user]["userID"];
     }
   }
-  return false;
 };
 
 // Helper function to check a user exits with a given url
