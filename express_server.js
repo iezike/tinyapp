@@ -1,4 +1,5 @@
 const express = require("express"); // import express, a framework to simpler server
+const bcrypt = require('bcryptjs'); // bcryptjs a JS variant of bcrypt use to hash password.
 const app = express(); // activate the express for use.
 const PORT = 8080; // default port value 8080
 const cookieParser = require('cookie-parser');
@@ -11,11 +12,7 @@ const generateRandomString = function() {
   return Math.random().toString(36).substring(2,8); // generates a random alphanumeric string of length six.
 };
 
-// Create an object to store long URL(main site), with shortURL keys
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
+// urlDatabase holds list of users and their created url.
 const urlDatabase = {
   b6UTxQ: {
         longURL: "https://www.tsn.ca",
@@ -47,10 +44,12 @@ const checkRegUser = function(emailAddress) {
 };
 
 const emailPasswordMatch = function(emailAddress, password) {
+  console.log(emailAddress, password)
+  console.log(users[checkRegUser(emailAddress)]["password"], password)
   if (!checkRegUser(emailAddress)) {
     return false;
   }
-  if(users[checkRegUser(emailAddress)]["password"] == password) {
+  if( bcrypt.compareSync(password, users[checkRegUser(emailAddress)]["password"])) {
     return true
   }
   return false;
@@ -143,14 +142,13 @@ app.post("/urls", (req, res) => {
 
 // Createn a route to handle edit url
 app.post("/urls/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL; // This retrieves the shortURL
   if (!req.cookies["user_id"]){
-    return res.redirect("/login")
+    return res.redirect("/login");
   }
   if (!urlUserIDMatch(urlDatabase[shortURL]["longURL"], req.cookies["user_id"])) {
-    return res.send(" Not authorized to Edit url")
+    return res.send(" Not authorized to Edit url");
   }
-  const shortURL = req.params.shortURL; // This retrieves the shortURL
-  // urlDatabase[shortURL]= req.body.longURL; 
   urlDatabase[shortURL]["longURL"]  = req.body.longURL; // pair the new shortURL with provided (Edited) longURL.
   res.redirect(`/urls/${shortURL}`);      // Respond with a redirect to  urls list page
 });
@@ -172,14 +170,15 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 // Create a login route
 app.post("/login", (req, res) => {
   const currentEmail = req.body.email;
-  const currentPassword = req.body.password;
+  const currentPassword = req.body.password; 
+  // const currentPassword = bcrypt.hashSync(req.body.password, 10); 
   if (req.body.email === "" || req.body.password === "") {
     return res.send("Invalid User");
   }
   if(!checkRegUser(currentEmail)) {
     return res.send("Invalid User");
   }
-  if (!emailPasswordMatch(currentEmail, currentPassword )){
+  if (!emailPasswordMatch(currentEmail, currentPassword)){
     return res.send("email does not match password");
   }
   res.cookie("user_id", checkRegUser(currentEmail));
@@ -199,10 +198,10 @@ app.post("/register", (req, res) => {
     return res.send("Invalid User");
   }
   if (checkRegUser(req.body.email)) {
-    return res.send("Email already exit ");
+    return res.send("Email already exit");
   }
   const newID = generateRandomString();
-  const newUser = { id: newID, email: req.body.email, password: req.body.password };
+  const newUser = { id: newID, email: req.body.email, password: bcrypt.hashSync(req.body.password, 10) };
   users[newID] = newUser;
   res.cookie("user_id", newID);
   res.redirect("/urls");
