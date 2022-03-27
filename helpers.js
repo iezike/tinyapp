@@ -1,4 +1,7 @@
+const bcrypt = require('bcryptjs'); // bcryptjs a JS variant of bcrypt use to hash password.
 // urlDatabase holds list of users and their created url.
+
+// Sample database for created user's shortURL-longURL 
 const urlDatabase = {
   b6UTxQ: {
         longURL: "https://www.tsn.ca",
@@ -10,7 +13,7 @@ const urlDatabase = {
     }
 };
 
-// Database for Registered users
+// Sample Database for Registered users
 const users = {
   "userRandomID": {
     userID: "userRandomID",
@@ -30,16 +33,13 @@ const getUserByEmail = function(emailAddress, users) {
 };
 
 // Helper function to check a user exits with a given url
-const urlUserIDMatch = function(longURL) {
+const urlUserIDMatch = function(longURL, urlDatabase) {
   for(let url in urlDatabase) {
-    if (urlDatabase[url]["longURL"] === longURL) {
+    if (urlDatabase[url]["longURL"] == longURL) {
       return urlDatabase[url]["userID"];
     }
   }
-  return false;
 };
-
-
 
 // generates a random alphanumeric string of length six
 const generateRandomString = function() {
@@ -50,6 +50,6 @@ module.exports = {
 
   getUserByEmail, 
   urlUserIDMatch, 
-  generateRandomString 
+  generateRandomString,
 
 };
