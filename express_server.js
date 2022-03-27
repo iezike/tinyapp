@@ -77,6 +77,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 // Create url.
 app.post("/urls", (req, res) => {
+  console.log(req.session.user_id)
   let userNewPage = {};
   if (!req.session.user_id){
     return res.redirect("/login");
