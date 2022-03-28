@@ -30,10 +30,20 @@ const emailPasswordMatch = function(emailAddress, password) {
   return false;
 };
 
+// Main url page
+app.get("/", (req, res) => {
+  if (req.session.user_id) {
+    return res.redirect("/urls");
+  } else {
+    return res.redirect("/login")
+  }
+});
 
 // Main url page
 app.get("/urls", (req, res) => {
-
+  if (!req.session.user_id) {
+    return res.redirect("/login");
+  }
   const urlFilter = {};
   for (let url in urlDatabase) {
     if (urlDatabase[url]["userID"] === req.session.user_id) {
@@ -47,7 +57,9 @@ app.get("/urls", (req, res) => {
 
 // Page for user to create a url
 app.get("/urls/new", (req, res) => {
-
+  if (!req.session.user_id) {
+    return res.redirect("/login");
+  }
   const templateVars = {  user: users[req.session.user_id] };
   res.render("urls_new", templateVars);
 
